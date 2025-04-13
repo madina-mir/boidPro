@@ -302,7 +302,7 @@ def redrawAll(app):
     else:
         drawMenu(app)
         
-    drawLabel(str(app.boidNumber), 60, 60, fill='white')
+    drawLabel(str(app.boidNumber), 60, 60, fill='white', size=15)
     
     
         
