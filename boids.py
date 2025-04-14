@@ -187,14 +187,12 @@ def onAppStart(app):
                                   app.cohesionX, app.alignmentX, app.separationX,
                                   app.bottonWidth, app.bottonY, app.bottonHeight)
     
-    
-    
-    # what is boids page and welcome page
+ # what is boids page and welcome page
     app.info = False # Opens instructions page
     app.enterNum = False 
     app.userInput = f"{app.boidNumber}"
     app.invalidNum = False
-    
+    app.focus = False
     # coordinates for the welcome page buttons 
     #create buttons once 
     app.boidInfo = WelcomeButtons(app.width/2, app.height * 0.38, 
@@ -208,7 +206,16 @@ def onAppStart(app):
     
     # Predator Parameters
     app.predator = True
- 
+    # manu app
+    #menuApp(app)
+    
+    app.menuX = app.width - app.width * 0.05
+    app.menuY = 0
+    app.menuWidth = app.width * 0.05
+    app.menuHeight =  app.height * 0.05
+    app.menuOpen = False
+  
+    
 def reset(app):
     onAppStart(app) 
        
@@ -223,10 +230,13 @@ def onStep(app):
     # Update the coordinates of the buttons in case of screen resize
     app.boidInfo = WelcomeButtons(app.width/2, app.height * 0.38, 
                     app.width * 0.25, app.height * 0.1, "What is Boid?")
+    
     app.inputButton = WelcomeButtons(app.width/2, app.height * 0.55, 
                     app.width * 0.25, app.height * 0.1, app.userInput)
+    
     app.startButton = WelcomeButtons(app.width/2, app.height * 0.66, 
                     app.width * 0.25, app.height * 0.1, "START!")
+    app.menuX = app.width - app.width * 0.05
     
            
 def onMousePress(app, x, y):
@@ -237,11 +247,11 @@ def onMousePress(app, x, y):
             app.info = True
         # Clicked input box
         elif app.inputButton.isInside(x, y):
-            app.inputButton.focus = True
+            app.focus = True
             app.enterNum = True # turn on focus
         else:
             app.enterNum = False  # Clicked outside input, disable typing
-            app.inputButton.focus = False  # remove focus
+            app.focus = False  # remove focus
         # Clicked "START!"
         if app.startButton.isInside(x, y):
             if app.userInput.isdigit():
@@ -271,6 +281,10 @@ def onMousePress(app, x, y):
         app.boids.append(Boids(x, y, random.uniform(-2, 2), 
                                random.uniform(-2, 2)))
     
+    # when the menu bar is clicked 
+    if (app.menuX <= x <= app.menuX + app.menuWidth and
+        app.menuY <= y <= app.menuY + app.menuHeight):
+        app.menuOpen = not app.menuOpen
     
 def onKeyPress(app, key):
     if app.enterNum:
@@ -300,11 +314,8 @@ def redrawAll(app):
         if app.info:
             drawInfoPage(app)
     else:
-        drawMenu(app)
+        menuBar(app)
         
     drawLabel(str(app.boidNumber), 60, 60, fill='white', size=15)
     
-    
-        
-
 runApp()                

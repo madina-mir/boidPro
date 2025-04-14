@@ -14,7 +14,7 @@ class WelcomeButtons:
         self.width = width 
         self.height = height 
         self.label = label
-        self.focus = False 
+        self.focus = app.focus 
     # method for drawing buttons with labels    
     def draw(self):
         drawRect(self.x, self.y, self.width, self.height, align="center",
@@ -30,7 +30,7 @@ class WelcomeButtons:
 def drawWelcome(app):
     # background coordinates
     drawRect(app.width*0.2, 0, app.width * 0.6, app.height, 
-            fill = rgb(0, 33, 71))
+            fill = rgb(37, 47, 55))
     # welcome
     drawLabel("Welcome!", app.width/2, app.height*0.2, 
                 size=app.width*0.05, font='times new roman', fill='white')
