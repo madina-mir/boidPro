@@ -61,6 +61,23 @@ def separation(boid, neighbors, minDist):
         sepVector[1] /= magnitude   
     return sepVector
 
+# imitate separation behavior for avoiding the obstacles
+def avoidObstacle(boid, obstacle, minDist):
+    if len(obstacle) == 0:
+        return (0, 0) 
+    vector = [0, 0] 
+    for obj in obstacle:
+        dist = distance(boid.x, boid.y, obj[0], obj[1])
+        if 0 < dist < minDist:  # Ensure it's within range
+            vector[0] += (boid.x - obj[0]) / dist  # Normalize
+            vector[1] += (boid.y - obj[1]) / dist  
+
+    magnitude = (vector[0]**2 + vector[1]**2)**0.5
+    if magnitude > 0:
+        vector[0] /= magnitude
+        vector[1] /= magnitude   
+    return vector
+    
 
 ### draw boid polygons 
 def drawBoid(app, boid):
@@ -93,10 +110,11 @@ class Boids:
         self.x = x
         self.y = y 
         self.vx = vx 
-        self.vy = vy 
+        self.vy = vy
+        
         
     # Updates the boid's position by adding its velocity   
-    def moveBoid(self, allBoids, visualRange, rule1, rule2, rule3):
+    def moveBoid(self, allBoids, visualRange, rule1, rule2, rule3, app):
         allNeighbors = neighbors(self, allBoids, visualRange)
         
         # apply the rules of cohesion
@@ -116,6 +134,12 @@ class Boids:
             separationImpact = separation(self, allNeighbors, minDist = 30)
             self.vx += separationImpact[0] * 1.1
             self.vy += separationImpact[1] * 1.1
+        
+        # apply rule for avoiding obstacle
+        obstacleImpact = avoidObstacle(self, app.obstacle, 70)
+        self.vx += obstacleImpact[0] * 1.1
+        self.vy += obstacleImpact[1] * 1.1
+        
         
         # limit the speed 
         maxSpeed = 15
@@ -216,7 +240,7 @@ def onAppStart(app):
     # creating buttons iside my menu 
     app.addBoid = MenuButton(app.height*0.2, "Add Boid", app)
     app.addObstacle = MenuButton(app.height*0.3, "Add Obstacle", app)
-    
+    app.obstacle = []
     
     
 def reset(app):
@@ -227,7 +251,7 @@ def onStep(app):
     if not app.start:
         for boid in app.boids:
             boid.moveBoid(app.boids, app.visualRange, 
-                        app.cohesion, app.alignment, app.separation)
+                        app.cohesion, app.alignment, app.separation, app)
             boid.avoidEdges(app.width, app.height)
             
     # Update the coordinates of the buttons in case of screen resize
@@ -240,7 +264,7 @@ def onStep(app):
     app.startButton = WelcomeButtons(app.width/2, app.height * 0.66, 
                     app.width * 0.25, app.height * 0.1, "START!")
     app.menuX = app.width - app.width * 0.05
-    
+    app.obstacle = app.obstacle
     
          
 def onMousePress(app, x, y):
@@ -301,6 +325,8 @@ def onMousePress(app, x, y):
         elif app.addObstacle.isOn(x, y):
             app.addObstacle.state = True
             app.addBoid.state = False
+    if app.addObstacle.state:
+        app.obstacle.append((x, y))
     
     
 def onKeyPress(app, key):

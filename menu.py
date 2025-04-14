@@ -38,24 +38,25 @@ class MenuButton:
         
   
 def menuBar(app):
+    # obstacle is drawn on mouse press
+    for obstacle in app.obstacle:
+        drawCircle(obstacle[0], obstacle[1], 10, fill="red")
+        
     # menu bar 
     # background for when menu is open
+    
     if app.menuOpen:
         drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/forestGreen.JPG", 
             3*app.width//4, app.menuY, width=app.width//4, height=app.height,
             align='left-top')
         app.addBoid.drawButton()
         app.addObstacle.drawButton()
-            
-            
-     
-     
-     
-            
+                
     # draw the menu bar using image    
     drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/blackMenu.png", 
             app.menuX, app.menuY, width=app.menuWidth, height=app.menuHeight,
             align='left-top')  
+    
     
     
     
