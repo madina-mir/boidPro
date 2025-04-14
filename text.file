@@ -1,3 +1,4 @@
 text.file
 Basically, the focus on the input number doesnt work because my 
 onStep keeps updating it to False
+Most features in the menu bar are mutually exclusive to stop crashing

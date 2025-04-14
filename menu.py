@@ -26,7 +26,7 @@ class MenuButton:
     def drawButton(self):
         drawRect(self.x, self.y, self.width, self.height, fill="white")
         drawLabel(self.label, self.x + self.width*0.3, self.y+self.height//2, 
-                  fill="black", size=self.height*0.5)
+                  fill="black", size=self.height*0.3)
         imagePath = ("/Users/ziyodjanmirzataev/Desktop/boidPro/onBtn.jpg" if \
                     self.state else "/Users/ziyodjanmirzataev/Desktop/boidPro/offBtn.jpg") 
         drawImage(imagePath,
@@ -34,7 +34,7 @@ class MenuButton:
                   self.y + self.height * 0.1,
                   width=self.height * 0.9,
                   height=self.height * 0.7,
-                  align='left-top')
+                  align='left-top') 
         
   
 def menuBar(app):
@@ -51,12 +51,26 @@ def menuBar(app):
             align='left-top')
         app.addBoid.drawButton()
         app.addObstacle.drawButton()
-                
+        app.predatorMode.drawButton()       
     # draw the menu bar using image    
     drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/blackMenu.png", 
             app.menuX, app.menuY, width=app.menuWidth, height=app.menuHeight,
             align='left-top')  
     
+    if app.predatorMode.state:
+        #app.predatorX = app.width//2
+        #app.predatorY = app.height//2
+        #app.predatorVx = 0
+        #app.predatorVy = 0
+        angle = math.degrees(math.atan2(app.predatorVx, app.predatorVy))
+        drawCircle(app.predatorX, app.predatorY, app.predatorSize*1.5, 
+                   fill="White", opacity=20)
+        drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/predator.png", 
+                  app.predatorX, app.predatorY, 
+                  width=app.predatorSize, height=app.predatorSize,
+                  rotateAngle = angle, align="center")
+        
+        
     
     
     

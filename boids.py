@@ -89,7 +89,7 @@ def drawBoid(app, boid):
         accurate boid rotation.
     """
     angle = math.degrees(math.atan2(boid.vy, boid.vx))
-        # Define three points for the bird triangular shape
+    # Define three points for the bird triangular shape
     tipX = boid.x + app.boidSize * 1.2 # Pointy front x
     tipY = boid.y  # Pointy front y
     leftX = boid.x - app.boidSize # Back left x
@@ -228,8 +228,6 @@ def onAppStart(app):
     app.startButton = WelcomeButtons(app.width/2, app.height * 0.66, 
                     app.width * 0.25, app.height * 0.1, "START!")
     
-   
-    
     # manu app
     app.menuX = app.width - app.width * 0.05
     app.menuY = 0
@@ -241,7 +239,14 @@ def onAppStart(app):
     app.addBoid = MenuButton(app.height*0.2, "Add Boid", app)
     app.addObstacle = MenuButton(app.height*0.3, "Add Obstacle", app)
     app.obstacle = []
-    
+    # predator mode
+    app.predatorMode = MenuButton(app.height*0.4, "Predator Mode", app)
+    # predator Parameters
+    app.predatorX = app.width//2
+    app.predatorY = app.height//2
+    app.predatorVx = 0
+    app.predatorVy = 0 # asked this line from chatGpt, it helps the predator look UP
+    app.predatorSize = 30
     
 def reset(app):
     onAppStart(app) 
@@ -264,9 +269,11 @@ def onStep(app):
     app.startButton = WelcomeButtons(app.width/2, app.height * 0.66, 
                     app.width * 0.25, app.height * 0.1, "START!")
     app.menuX = app.width - app.width * 0.05
+    # update the list of obstacles in each frame
     app.obstacle = app.obstacle
     
-         
+    
+       
 def onMousePress(app, x, y):
     # start botton 
     if app.start:
@@ -303,9 +310,7 @@ def onMousePress(app, x, y):
         app.alignment = not app.alignment
     if app.ruleButtons.separationClicked(x, y, app):
         app.separation = not app.separation
-    
-    
-        
+   
     # One mouse press boid generation
     if app.addBoid.state:
         app.boids.append(Boids(x, y, random.uniform(-2, 2), 
@@ -321,11 +326,23 @@ def onMousePress(app, x, y):
         if app.addBoid.isOn(x, y):
             app.addBoid.state = True
             app.addObstacle.state = False
+            app.obstacle = []
+            app.predatorMode.state = False
 
         elif app.addObstacle.isOn(x, y):
             app.addObstacle.state = True
             app.addBoid.state = False
-    if app.addObstacle.state:
+            app.predatorMode.state = False
+        
+        elif app.predatorMode.isOn(x, y):
+            app.predatorMode.state = True
+            app.addBoid.state = False
+            app.addObstacle.state = False
+            app.obstacle = []
+            
+    if app.addObstacle.state and not (app.ruleButtons.cohesionClicked(x, y, app) or 
+                                      app.ruleButtons.alignmentClicked(x, y, app) or
+                                      app.ruleButtons.separationClicked(x, y, app)):
         app.obstacle.append((x, y))
     
     
@@ -349,8 +366,10 @@ def redrawAll(app):
     #  Loop through all boids and draw them as triangles 
     for boid in app.boids:
         drawBoid(app, boid)        
-    # draw the rule buttons  
+    
+    # draw the rule buttons 
     app.ruleButtons.draw(app)
+    
     # START PAGE 
     if app.start:
         drawWelcome(app)
@@ -359,6 +378,6 @@ def redrawAll(app):
     else:
         menuBar(app)
         
-    drawLabel(str(app.boidNumber), 60, 60, fill='white', size=15)
+    
     
 runApp()                
