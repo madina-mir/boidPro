@@ -204,17 +204,20 @@ def onAppStart(app):
     app.startButton = WelcomeButtons(app.width/2, app.height * 0.66, 
                     app.width * 0.25, app.height * 0.1, "START!")
     
-    # Predator Parameters
-    app.predator = True
-    # manu app
-    #menuApp(app)
+   
     
+    # manu app
     app.menuX = app.width - app.width * 0.05
     app.menuY = 0
     app.menuWidth = app.width * 0.05
     app.menuHeight =  app.height * 0.05
     app.menuOpen = False
-  
+    
+    # creating buttons iside my menu 
+    app.addBoid = MenuButton(app.height*0.2, "Add Boid", app)
+    app.addObstacle = MenuButton(app.height*0.3, "Add Obstacle", app)
+    
+    
     
 def reset(app):
     onAppStart(app) 
@@ -238,7 +241,8 @@ def onStep(app):
                     app.width * 0.25, app.height * 0.1, "START!")
     app.menuX = app.width - app.width * 0.05
     
-           
+    
+         
 def onMousePress(app, x, y):
     # start botton 
     if app.start:
@@ -275,9 +279,11 @@ def onMousePress(app, x, y):
         app.alignment = not app.alignment
     if app.ruleButtons.separationClicked(x, y, app):
         app.separation = not app.separation
-         
+    
+    
+        
     # One mouse press boid generation
-    if app.predator:
+    if app.addBoid.state:
         app.boids.append(Boids(x, y, random.uniform(-2, 2), 
                                random.uniform(-2, 2)))
     
@@ -285,6 +291,17 @@ def onMousePress(app, x, y):
     if (app.menuX <= x <= app.menuX + app.menuWidth and
         app.menuY <= y <= app.menuY + app.menuHeight):
         app.menuOpen = not app.menuOpen
+    
+    # feature in the menu
+    if app.menuOpen:
+        if app.addBoid.isOn(x, y):
+            app.addBoid.state = True
+            app.addObstacle.state = False
+
+        elif app.addObstacle.isOn(x, y):
+            app.addObstacle.state = True
+            app.addBoid.state = False
+    
     
 def onKeyPress(app, key):
     if app.enterNum:
