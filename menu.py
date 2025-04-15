@@ -26,8 +26,8 @@ class MenuButton:
         drawRect(self.x, self.y, self.width, self.height, fill="white")
         drawLabel(self.label, self.x + self.width*0.3, self.y+self.height//2, 
                   fill="black", size=self.height*0.3)
-        imagePath = ("/Users/ziyodjanmirzataev/Desktop/boidPro/onBtn.jpg" if \
-                    self.state else "/Users/ziyodjanmirzataev/Desktop/boidPro/offBtn.jpg") 
+        imagePath = ("onBtn.jpg" if \
+                    self.state else "offBtn.jpg") 
         drawImage(imagePath,
                   self.x + self.width - self.width * 0.2,
                   self.y + self.height * 0.1,
@@ -44,14 +44,14 @@ def menuBar(app):
     # menu bar 
     # background for when menu is open
     if app.menuOpen:
-        drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/forestGreen.JPG", 
+        drawImage("forestGreen.JPG", 
             3*app.width//4, app.menuY, width=app.width//4, height=app.height,
             align='left-top')
         app.addBoid.drawButton()
         app.addObstacle.drawButton()
         app.predatorMode.drawButton()       
     # draw the menu bar using image    
-    drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/blackMenu.png", 
+    drawImage("blackMenu.png", 
             app.menuX, app.menuY, width=app.menuWidth, height=app.menuHeight,
             align='left-top')  
     
@@ -62,7 +62,7 @@ def menuBar(app):
             drawCircle(app.pred['x'], app.pred['y'], app.predatorSize*1.5, 
                     fill="White", opacity=20)
             # predator that I drew myself!
-            drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/predator.png", 
+            drawImage("predator.png", 
                     app.pred['x'], app.pred['y'],
                     width = app.predatorSize, height = app.predatorSize,
                     rotateAngle = app.pred['d'], align="center")

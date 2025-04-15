@@ -4,8 +4,6 @@ import math
 from wlecome import *
 from ruleButtons import *
 from menu import *
-
-
 # HELPER FUNCTIONS
 #__________________________________FIND_NEIGHBORS_______________________________
 def neighbors(curBoid, otherBoids, visualRange):
