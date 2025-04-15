@@ -5,6 +5,7 @@ from wlecome import *
 from ruleButtons import *
 from menu import *
 
+
 # HELPER FUNCTIONS
 #__________________________________FIND_NEIGHBORS_______________________________
 def neighbors(curBoid, otherBoids, visualRange):
@@ -98,7 +99,7 @@ def avoidPredator (boid, predator, minDist):
     
 
 
-### draw boid polygons 
+#draw boid polygons_____________________________________________________________ 
 def drawBoid(app, boid):
      # Calculate rotation angle based on velocity
     """
@@ -129,9 +130,7 @@ class Boids:
         self.x = x
         self.y = y 
         self.vx = vx 
-        self.vy = vy
-        
-        
+        self.vy = vy   
     # Updates the boid's position by adding its velocity   
     def moveBoid(self, allBoids, visualRange, rule1, rule2, rule3, app):
         allNeighbors = neighbors(self, allBoids, visualRange)
@@ -191,26 +190,23 @@ class Boids:
             self.vy += turnFactor
         if self.y > height - margin:
             self.vy -= turnFactor
- #______________________________________________________________________________
+#______________________________________________________________________________
+# Organization of variables assigned to onAppStart
 
- #____________________________onAppStart________________________________________    
-def onAppStart(app):
-    app.background = "black"
-    app.width = 1400
-    app.height = 800 
+def basicParameters(app):
     app.start = True
-    
     app.color = rgb(90, 69, 167)
+    
     # Boid rules 
     app.cohesion = True
     app.alignment = True 
     app.separation = True 
-    
     # Boid's parameters
     app.boidNumber = 100
     app.boidSize = 6
     app.visualRange = 30 
     app.centeringStep = 0.005 # adjust velocity by this %
+    
     """
     use the class Boids and create boidNumber of boids at random positions
     with initial velocity set between -2 to 2 so they go right/left/up/down
@@ -223,6 +219,7 @@ def onAppStart(app):
         vy = random.uniform(-2, 2)
         app.boids.append(Boids(x, y, vx, vy))
     
+def ruleButtons(app):
     # Rule Botton coordinates 
     app.bottonY = app.height*0.9
     app.bottonWidth = app.width * 0.1
@@ -230,35 +227,34 @@ def onAppStart(app):
     app.cohesionX = app.width * 0.1
     app.alignmentX = app.width * 0.3
     app.separationX = app.width * 0.5
-    
+    # passing variables to the class
     app.ruleButtons = BoidRuleButtons(app.width, app.height,
-                                  app.cohesionX, app.alignmentX, app.separationX,
-                                  app.bottonWidth, app.bottonY, app.bottonHeight)
+                        app.cohesionX, app.alignmentX, app.separationX,
+                        app.bottonWidth, app.bottonY, app.bottonHeight)
     
- # what is boids page and welcome page
+
+def welcomePage(app):
     app.info = False # Opens instructions page
-    app.enterNum = False 
+    app.enterNum = False # becomes true if user clicks the rect for user Input
     app.userInput = f"{app.boidNumber}"
-    app.invalidNum = False
-    app.focus = False
+    app.invalidNum = False # sets max and minimum enterable variable
+    app.focus = False # shows when input can be modified
     # coordinates for the welcome page buttons 
-    #create buttons once 
+    # create buttons using the class 
     app.boidInfo = WelcomeButtons(app.width/2, app.height * 0.38, 
                     app.width * 0.25, app.height * 0.1, "What is Boid?")
-   
     app.inputButton = WelcomeButtons(app.width/2, app.height * 0.55, 
                     app.width * 0.25, app.height * 0.1, app.userInput)
     # start button 
     app.startButton = WelcomeButtons(app.width/2, app.height * 0.66, 
                     app.width * 0.25, app.height * 0.1, "START!")
     
-    # manu app
+def menuParameters(app):
     app.menuX = app.width - app.width * 0.05
     app.menuY = 0
     app.menuWidth = app.width * 0.05
     app.menuHeight =  app.height * 0.05
     app.menuOpen = False
-    
     # creating buttons iside my menu 
     app.addBoid = MenuButton(app.height*0.2, "Add Boid", app)
     app.addObstacle = MenuButton(app.height*0.3, "Add Obstacle", app)
@@ -269,6 +265,21 @@ def onAppStart(app):
     app.predatorSize = 30
     app.pred = None
     
+ #____________________________onAppStart________________________________________    
+def onAppStart(app):
+    app.background = "black"
+    app.width = 1400
+    app.height = 800 
+    # fundamental variables for boid movement
+    basicParameters(app)
+    # Rule Botton coordinates 
+    ruleButtons(app)
+    # Welcome page variables
+    welcomePage(app)
+    # menu tab variables
+    menuParameters(app)
+
+# click R to reset!       
 def reset(app):
     onAppStart(app) 
        
@@ -277,7 +288,7 @@ def onStep(app):
     if not app.start:
         for boid in app.boids:
             boid.moveBoid(app.boids, app.visualRange, 
-                        app.cohesion, app.alignment, app.separation, app)
+                app.cohesion, app.alignment, app.separation, app)
             boid.avoidEdges(app.width, app.height)
             
     # Update the coordinates of the buttons in case of screen resize
@@ -324,7 +335,8 @@ def onMousePress(app, x, y):
                     app.start = False
                 else:
                     app.invalidNum = True 
-                   
+                    
+    # update true/false when rule buttons are clicked              
     if app.ruleButtons.cohesionClicked(x, y, app):
         app.cohesion = not app.cohesion
     if app.ruleButtons.alignmentClicked(x, y, app):
@@ -337,30 +349,32 @@ def onMousePress(app, x, y):
         app.boids.append(Boids(x, y, random.uniform(-2, 2), 
                                random.uniform(-2, 2)))
     
-    # when the menu bar is clicked 
+    # when the menu bar is clicked, close and open the menu 
     if (app.menuX <= x <= app.menuX + app.menuWidth and
         app.menuY <= y <= app.menuY + app.menuHeight):
         app.menuOpen = not app.menuOpen
     
-    # feature in the menu
+    # features in the menu
     if app.menuOpen:
+        # mutually exclusive features for improved efficiency
+        # add boids on Mouse click
         if app.addBoid.isOn(x, y):
             app.addBoid.state = True
             app.addObstacle.state = False
-            app.obstacle = []
+            app.obstacle = [] #remove obstacles when its state is off
             app.predatorMode.state = False
-
+        # add obstacles on mouse click
         elif app.addObstacle.isOn(x, y):
             app.addObstacle.state = True
             app.addBoid.state = False
             app.predatorMode.state = False
-        
+        # become a predator and scare the boids!
         elif app.predatorMode.isOn(x, y):
             app.predatorMode.state = True
             app.addBoid.state = False
             app.addObstacle.state = False
             app.obstacle = []
-            
+    # avoid overdrawing the buttons with obstacles       
     if app.addObstacle.state and not (app.ruleButtons.cohesionClicked(x, y, app) or 
                                       app.ruleButtons.alignmentClicked(x, y, app) or
                                       app.ruleButtons.separationClicked(x, y, app)):
@@ -384,9 +398,9 @@ def onKeyPress(app, key):
         reset(app)
         
 def onMouseMove(app, x, y):
-    #print(app.pred)
+    # control the degree and movement of predator on mouse move
     if app.pred != None:
-        if (x != app.pred['x'] and app.pred['y'] != y):    #mouse pos changed    
+        if (x != app.pred['x'] and app.pred['y'] != y):   #mouse pos changed    
             dx = x - app.pred['x']
             dy = y - app.pred['y']
             app.pred = {
@@ -400,18 +414,6 @@ def onMouseMove(app, x, y):
             'y': y,
             'd': 0,
         }
-
-def onKeyHold(app, keys):
-    if 'right' in keys:
-        app.predatorX += 10
-    if 'left' in keys:
-        app.predatorX -= 10
-    if 'up' in keys:
-        app.predatorY -= 10
-    if 'down' in keys:
-        app.predatorY += 10
-        app.predatorVx = 0
-   
                     
 def redrawAll(app):
     #  Loop through all boids and draw them as triangles 

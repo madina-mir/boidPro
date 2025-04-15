@@ -13,7 +13,6 @@ class MenuButton:
         self.width = app.width//4
         self.height = app.height * 0.08 
         
-    
     # checks if on/off is clicked and returns true/false
     def isOn(self, mouseX, mouseY):
         return (self.x <= mouseX <= self.x + self.width and
@@ -44,7 +43,6 @@ def menuBar(app):
         
     # menu bar 
     # background for when menu is open
-    
     if app.menuOpen:
         drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/forestGreen.JPG", 
             3*app.width//4, app.menuY, width=app.width//4, height=app.height,
@@ -60,8 +58,10 @@ def menuBar(app):
     if app.predatorMode.state:
         # turn on the predator mode
         if app.pred:
+            # lighting effect
             drawCircle(app.pred['x'], app.pred['y'], app.predatorSize*1.5, 
                     fill="White", opacity=20)
+            # predator that I drew myself!
             drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/predator.png", 
                     app.pred['x'], app.pred['y'],
                     width = app.predatorSize, height = app.predatorSize,
