@@ -58,18 +58,14 @@ def menuBar(app):
             align='left-top')  
     
     if app.predatorMode.state:
-        #app.predatorX = app.width//2
-        #app.predatorY = app.height//2
-        #app.predatorVx = 0
-        #app.predatorVy = 0
-        angle = math.degrees(math.atan2(app.predatorVx, app.predatorVy))
-        drawCircle(app.predatorX, app.predatorY, app.predatorSize*1.5, 
-                   fill="White", opacity=20)
-        drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/predator.png", 
-                  app.predatorX, app.predatorY, 
-                  width=app.predatorSize, height=app.predatorSize,
-                  rotateAngle = angle, align="center")
-        
+        # turn on the predator mode
+        if app.pred:
+            drawCircle(app.pred['x'], app.pred['y'], app.predatorSize*1.5, 
+                    fill="White", opacity=20)
+            drawImage("/Users/ziyodjanmirzataev/Desktop/boidPro/predator.png", 
+                    app.pred['x'], app.pred['y'],
+                    width = app.predatorSize, height = app.predatorSize,
+                    rotateAngle = app.pred['d'], align="center")
         
     
     

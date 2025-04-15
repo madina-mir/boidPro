@@ -78,6 +78,25 @@ def avoidObstacle(boid, obstacle, minDist):
         vector[1] /= magnitude   
     return vector
     
+# make the boids escape the predator
+def avoidPredator (boid, predator, minDist):
+    if predator == None:
+        return (0, 0)
+    dist = distance(boid.x, boid.y, predator['x'], predator['y'])
+    vector = [0, 0]
+    if 0 < dist < minDist:  # Ensure it's within range
+        vector[0] += (boid.x - predator['x']) / dist  # Normalize
+        vector[1] += (boid.y - predator['y']) / dist  
+            
+    magnitude = (vector[0]**2 + vector[1]**2)**0.5
+    if magnitude > 0:
+        vector[0] /= magnitude
+        vector[1] /= magnitude 
+          
+    return vector
+    
+    
+
 
 ### draw boid polygons 
 def drawBoid(app, boid):
@@ -137,8 +156,13 @@ class Boids:
         
         # apply rule for avoiding obstacle
         obstacleImpact = avoidObstacle(self, app.obstacle, 70)
-        self.vx += obstacleImpact[0] * 1.1
-        self.vy += obstacleImpact[1] * 1.1
+        self.vx += obstacleImpact[0] * 2
+        self.vy += obstacleImpact[1] * 2 # escape the obstacle with faster speed
+        
+        # apply rule for escaping the predator
+        predatorImpact = avoidPredator(self, app.pred, 50)
+        self.vx += predatorImpact[0] * 3
+        self.vy += predatorImpact[1] * 3
         
         
         # limit the speed 
@@ -242,11 +266,8 @@ def onAppStart(app):
     # predator mode
     app.predatorMode = MenuButton(app.height*0.4, "Predator Mode", app)
     # predator Parameters
-    app.predatorX = app.width//2
-    app.predatorY = app.height//2
-    app.predatorVx = 0
-    app.predatorVy = 0 # asked this line from chatGpt, it helps the predator look UP
     app.predatorSize = 30
+    app.pred = None
     
 def reset(app):
     onAppStart(app) 
@@ -361,6 +382,36 @@ def onKeyPress(app, key):
     # reset            
     if key == "r":
         reset(app)
+        
+def onMouseMove(app, x, y):
+    #print(app.pred)
+    if app.pred != None:
+        if (x != app.pred['x'] and app.pred['y'] != y):    #mouse pos changed    
+            dx = x - app.pred['x']
+            dy = y - app.pred['y']
+            app.pred = {
+                'x': x,
+                'y': y,
+                'd': (math.degrees(math.atan2(dy, dx))+90)%360,
+            }
+    else:
+        app.pred = {
+            'x': x,
+            'y': y,
+            'd': 0,
+        }
+
+def onKeyHold(app, keys):
+    if 'right' in keys:
+        app.predatorX += 10
+    if 'left' in keys:
+        app.predatorX -= 10
+    if 'up' in keys:
+        app.predatorY -= 10
+    if 'down' in keys:
+        app.predatorY += 10
+        app.predatorVx = 0
+   
                     
 def redrawAll(app):
     #  Loop through all boids and draw them as triangles 
