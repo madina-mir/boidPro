@@ -5,6 +5,7 @@ from wlecome import *
 from ruleButtons import *
 from menu import *
 from quadTree import *
+from specialGame import *
 
 # HELPER FUNCTIONS
 #__________________________________FIND_NEIGHBORS_______________________________
@@ -179,7 +180,7 @@ class Boids:
         
         
         # limit the speed 
-        maxSpeed = 10
+        maxSpeed = 15
         speed = (self.vx**2 + self.vy**2) ** 0.5 # calculate speed
 
         # If the boid's speed exceeds maxSpeed, scale velocity down 
@@ -204,6 +205,19 @@ class Boids:
             self.vy += turnFactor
         if self.y > height - margin:
             self.vy -= turnFactor
+            
+            
+# child CLASS FOR PEOPLE
+class People(Boids):
+    def __init__(self, x, y, vx, vy, image):
+        super().__init__(x, y, vx, vy)
+        self.image = image
+        
+    def movePeople(self, quadtree, visualRange, rule1, rule2, rule3, app):
+        return super().moveBoid(quadtree, visualRange, rule1, rule2, rule3, app)
+    
+    def avoidEdges(self, width, height):
+        return super().avoidEdges(width, height)  
 #______________________________________________________________________________
 # Organization of variables assigned to onAppStart
 
@@ -294,6 +308,9 @@ def onAppStart(app):
     welcomePage(app)
     # menu tab variables
     menuParameters(app)
+    # Game paramters
+    app.gameMode = False
+    app.people = []
 
 # click R to reset!       
 def reset(app):
@@ -308,13 +325,27 @@ def onStep(app):
         qt.insert(Point(boid.x, boid.y, data=boid)) 
         
         
-    if not app.start:
+    if not app.start and not app.gameMode:
         # move after welcome page is closed
         for boid in app.boids:
             # Move boid based on nearby boids using the quadtree
             boid.moveBoid(qt, app.visualRange, 
                 app.cohesion, app.alignment, app.separation, app)
             boid.avoidEdges(app.width, app.height) 
+    # runs people on the game mode
+    if app.gameMode:
+        qt = Quadtree(Rectangle(0, 0, app.width, app.height), capacity=4)
+        for person in app.people: 
+            qt.insert(Point(person.x, person.y, data=person))
+        for person in app.people:
+            person.movePeople(qt, app.visualRange,
+                            app.cohesion, app.alignment, app.separation, app)
+            person.avoidEdges(app.width, app.height)
+        
+        
+        
+        
+    
             
     # Update the coordinates of the buttons in case of screen resize
     app.boidInfo = WelcomeButtons(app.width/2, app.height * 0.38, 
@@ -334,32 +365,32 @@ def onStep(app):
 def onMousePress(app, x, y):
     # start botton 
     if app.start:
-        # Clicked "What is Boid?"
-        if app.boidInfo.isInside(x, y):
-            app.info = True
-        # Clicked input box
-        elif app.inputButton.isInside(x, y):
-            app.focus = True
-            app.enterNum = True # turn on focus
-        else:
-            app.enterNum = False  # Clicked outside input, disable typing
-            app.focus = False  # remove focus
-        # Clicked "START!"
-        if app.startButton.isInside(x, y):
-            if app.userInput.isdigit():
-                num = int(app.userInput)
-                if 0 <= num <= 500:
-                    app.boidNumber = int(app.userInput)
-                    app.boids = []
-                    for _ in range(app.boidNumber):
-                        bx = random.randint(0, app.width)
-                        by = random.randint(0, app.height)
-                        vx = random.uniform(-2, 2)
-                        vy = random.uniform(-2, 2)
-                        app.boids.append(Boids(bx, by, vx, vy))
-                    app.start = False
-                else:
-                    app.invalidNum = True 
+            # Clicked "What is Boid?"
+            if app.boidInfo.isInside(x, y):
+                app.info = True
+            # Clicked input box
+            elif app.inputButton.isInside(x, y):
+                app.focus = True
+                app.enterNum = True # turn on focus
+            else:
+                app.enterNum = False  # Clicked outside input, disable typing
+                app.focus = False  # remove focus
+            # Clicked "START!"
+            if app.startButton.isInside(x, y):
+                if app.userInput.isdigit():
+                    num = int(app.userInput)
+                    if 0 <= num <= 500:
+                        app.boidNumber = int(app.userInput)
+                        app.boids = []
+                        for _ in range(app.boidNumber):
+                            bx = random.randint(0, app.width)
+                            by = random.randint(0, app.height)
+                            vx = random.uniform(-2, 2)
+                            vy = random.uniform(-2, 2)
+                            app.boids.append(Boids(bx, by, vx, vy))
+                        app.start = False
+                    else:
+                        app.invalidNum = True 
                     
     # update true/false when rule buttons are clicked              
     if app.ruleButtons.cohesionClicked(x, y, app):
@@ -368,7 +399,6 @@ def onMousePress(app, x, y):
         app.alignment = not app.alignment
     if app.ruleButtons.separationClicked(x, y, app):
         app.separation = not app.separation
-   
     # One mouse press boid generation
     if app.addBoid.state:
         app.boids.append(Boids(x, y, random.uniform(-2, 2), 
@@ -402,6 +432,11 @@ def onMousePress(app, x, y):
             app.predatorMode.state = False
             app.addBoid.state = False
             app.addObstacle.state = False
+           
+         # switch mode to game 
+        if app.specialGame.isOn(x, y):
+            app.gameMode = not app.gameMode
+        
     # avoid overdrawing the buttons with obstacles       
     if app.addObstacle.state and not (app.ruleButtons.cohesionClicked(x, y, app) or 
                                       app.ruleButtons.alignmentClicked(x, y, app) or
@@ -446,11 +481,12 @@ def onMouseMove(app, x, y):
                     
 def redrawAll(app):
     #  Loop through all boids and draw them as triangles 
-    for boid in app.boids:
-        drawBoid(app, boid)        
-    
-    # draw the rule buttons 
-    app.ruleButtons.draw(app)
+    if not app.gameMode:
+        for boid in app.boids:
+            drawBoid(app, boid)  
+    else:
+        drawRect(0, 0, app.width, app.height)
+              
     
     # START PAGE 
     if app.start:
@@ -459,5 +495,7 @@ def redrawAll(app):
             drawInfoPage(app)
     else:
         menuBar(app)
+         # draw the rule buttons 
+        app.ruleButtons.draw(app) 
            
 runApp()                

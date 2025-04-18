@@ -3,9 +3,12 @@ from cmu_graphics import *
 import random 
 def drawInfoPage(app):
     drawRect(app.width*0.2, 0, app.width * 0.6, app.height, 
-                 fill = "white")
-    drawLabel("Coming Soon...", app.width//2, app.height//3, size=50)
-    drawLabel("press delete or backspace to go back", app.width//2, app.height//2, size=25)
+                 fill = "white", opacity=0)
+    drawImage("images/whatsBoid.png", app.width*0.2, 0, width=app.width * 0.6,
+              height = app.height)
+             
+    drawLabel("press delete or backspace to go back", 
+              app.width//2, app.height*0.95,  fill="white", size=25)
     
 class WelcomeButtons:
     def __init__(self, x, y, width, height, label):
@@ -18,7 +21,8 @@ class WelcomeButtons:
     # method for drawing buttons with labels    
     def draw(self):
         drawRect(self.x, self.y, self.width, self.height, align="center",
-                 fill=None, border = rgb(90, 69, 167) if self.focus else "white")
+                 fill=None, border = "green" if self.focus else "white",
+                 borderWidth=7)
         drawLabel(self.label, self.x, self.y, 
                 size = self.width*0.1, fill = "white", font='times new roman')
     # method to check if the button has been clicked   
@@ -29,8 +33,9 @@ class WelcomeButtons:
     
 def drawWelcome(app):
     # background coordinates
+    drawImage("images/realBirds.jpg", 0, 0, width=app.width, height=app.height)
     drawRect(app.width*0.2, 0, app.width * 0.6, app.height, 
-            fill = rgb(37, 47, 55))
+            fill = rgb(37, 47, 55), opacity=75)
     # welcome
     drawLabel("Welcome!", app.width/2, app.height*0.2, 
                 size=app.width*0.05, font='times new roman', fill='white')
