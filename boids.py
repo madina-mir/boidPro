@@ -217,7 +217,32 @@ class People(Boids):
         return super().moveBoid(quadtree, visualRange, rule1, rule2, rule3, app)
     
     def avoidEdges(self, width, height):
-        return super().avoidEdges(width, height)  
+        return super().avoidEdges(width, height)
+    
+    def draw(self):
+        drawImage(self.image, self.x, self.y, width=80, height=80)
+  
+    
+
+# manually drawing people
+def addPeople(app):
+    images = ["people/adam.png", "people/amen.png", 
+              "people/anurag.png",  "people/belix.png",
+              "people/mohammed.png", "people/salman.png", 
+              "people/yasa.png"]
+    for img in images:
+        app.people.append(People(
+            x = random.randint(0, app.width),
+            y = random.randint(0, app.height),
+            vx = random.uniform(-2, 2),
+            vy = random.uniform(-2, 2),
+            image = img
+        ))
+        
+def drawPeople(app):
+    for people in app.people:
+        people.draw()
+
 #______________________________________________________________________________
 # Organization of variables assigned to onAppStart
 
@@ -342,11 +367,7 @@ def onStep(app):
                             app.cohesion, app.alignment, app.separation, app)
             person.avoidEdges(app.width, app.height)
         
-        
-        
-        
-    
-            
+       
     # Update the coordinates of the buttons in case of screen resize
     app.boidInfo = WelcomeButtons(app.width/2, app.height * 0.38, 
                     app.width * 0.25, app.height * 0.1, "What is Boid?")
@@ -433,9 +454,11 @@ def onMousePress(app, x, y):
             app.addBoid.state = False
             app.addObstacle.state = False
            
-         # switch mode to game 
+         # switch mode to game  
         if app.specialGame.isOn(x, y):
             app.gameMode = not app.gameMode
+            if app.gameMode:
+                addPeople(app)
         
     # avoid overdrawing the buttons with obstacles       
     if app.addObstacle.state and not (app.ruleButtons.cohesionClicked(x, y, app) or 
@@ -478,14 +501,18 @@ def onMouseMove(app, x, y):
                 'y': y,
                 'd': 0,
             }
-                    
+
+
+
+
+                   
 def redrawAll(app):
     #  Loop through all boids and draw them as triangles 
     if not app.gameMode:
         for boid in app.boids:
             drawBoid(app, boid)  
-    else:
-        drawRect(0, 0, app.width, app.height)
+    elif app.gameMode:
+        drawPeople(app)
               
     
     # START PAGE 
