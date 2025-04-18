@@ -4,16 +4,32 @@ import math
 from wlecome import *
 from ruleButtons import *
 from menu import *
+from quadTree import *
+
 # HELPER FUNCTIONS
 #__________________________________FIND_NEIGHBORS_______________________________
-def neighbors(curBoid, otherBoids, visualRange):
+def neighbors(curBoid, quadtree, visualRange):
+    # updated quadtree neighbor finder that loops only the area of its visual range
+    
+    # Create a box around the current boid
+    # This is the area where we will search for nearby boids
+    visionBox = Rectangle(
+        curBoid.x - visualRange / 2,  # top-left x
+        curBoid.y - visualRange / 2,  # top-left y
+        visualRange,                  # width
+        visualRange                   # height
+    )
+    # Ask the quadtree to return all points (boids) in that box
+    nearbyPoints = quadtree.queryRange(visionBox)
+
+    # Loop through the results and collect the actual boids 
     boidNeighbors = []
-    # loop by exluding the boid itself and collect the neighbors
-    for boid in otherBoids:
-        if (boid != curBoid and 
-            distance(curBoid.x, curBoid.y, boid.x, boid.y) < visualRange):
+    for point in nearbyPoints:
+        boid = point.data  # .data holds the actual boid object
+        if boid != curBoid:  # don't include self
             boidNeighbors.append(boid)
-    return boidNeighbors 
+    # Return the list of nearby boids, now it's super efficient!
+    return boidNeighbors
 #_______________________________APPLY_BOID_RULES________________________________
 # apply rule of cohesion
 def cohesion(boid, neighbors):
@@ -130,20 +146,20 @@ class Boids:
         self.vx = vx 
         self.vy = vy   
     # Updates the boid's position by adding its velocity   
-    def moveBoid(self, allBoids, visualRange, rule1, rule2, rule3, app):
-        allNeighbors = neighbors(self, allBoids, visualRange)
+    def moveBoid(self, quadtree, visualRange, rule1, rule2, rule3, app):
+        allNeighbors = neighbors(self, quadtree, visualRange)
         
         # apply the rules of cohesion
         if rule1: 
             cohesionImpact = cohesion(self, allNeighbors)
-            self.vx += cohesionImpact[0] * 0.1 # slightly changes the vector in each frame toward the center mass
-            self.vy += cohesionImpact[1] * 0.1
+            self.vx += cohesionImpact[0] * 0.05 # slightly changes the vector in each frame toward the center mass
+            self.vy += cohesionImpact[1] * 0.05
         
         # apply rules of alignment 
         if rule2:
             alignmentImpact = alignment(self, allNeighbors)
-            self.vx += alignmentImpact[0] * 0.5
-            self.vy += alignmentImpact[1] * 0.5
+            self.vx += alignmentImpact[0] * 0.6
+            self.vy += alignmentImpact[1] * 0.6
         
         # apply rules for separation
         if rule3:
@@ -163,7 +179,7 @@ class Boids:
         
         
         # limit the speed 
-        maxSpeed = 15
+        maxSpeed = 10
         speed = (self.vx**2 + self.vy**2) ** 0.5 # calculate speed
 
         # If the boid's speed exceeds maxSpeed, scale velocity down 
@@ -178,7 +194,7 @@ class Boids:
         
     # each boid should avoid dissapearing from the canvas
     def avoidEdges(self, width, height):
-        margin = 150 # margin by which boid starts to avoid
+        margin = 100 # margin by which boid starts to avoid
         turnFactor = 1 # factor by which boid makes the turn 
         if self.x < margin:
             self.vx += turnFactor
@@ -202,8 +218,8 @@ def basicParameters(app):
     # Boid's parameters
     app.boidNumber = 100
     app.boidSize = 6
-    app.visualRange = 30 
-    app.centeringStep = 0.005 # adjust velocity by this %
+    app.visualRange = 60
+    app.centeringStep = 0.008 # adjust velocity by this %
     
     """
     use the class Boids and create boidNumber of boids at random positions
@@ -262,6 +278,8 @@ def menuParameters(app):
     # predator Parameters
     app.predatorSize = 30
     app.pred = None
+    # special game button
+    app.specialGame = MenuButton(app.height*0.5, "Special Game", app)
     
  #____________________________onAppStart________________________________________    
 def onAppStart(app):
@@ -283,11 +301,20 @@ def reset(app):
        
 def onStep(app):
     # get the boids moving randomly
+    # Build a new quadtree for this and each frame
+    qt = Quadtree(Rectangle(0, 0, app.width, app.height), capacity=4)
+    # Insert all boids into the quadtree based on current position
+    for boid in app.boids:
+        qt.insert(Point(boid.x, boid.y, data=boid)) 
+        
+        
     if not app.start:
+        # move after welcome page is closed
         for boid in app.boids:
-            boid.moveBoid(app.boids, app.visualRange, 
+            # Move boid based on nearby boids using the quadtree
+            boid.moveBoid(qt, app.visualRange, 
                 app.cohesion, app.alignment, app.separation, app)
-            boid.avoidEdges(app.width, app.height)
+            boid.avoidEdges(app.width, app.height) 
             
     # Update the coordinates of the buttons in case of screen resize
     app.boidInfo = WelcomeButtons(app.width/2, app.height * 0.38, 
@@ -321,7 +348,7 @@ def onMousePress(app, x, y):
         if app.startButton.isInside(x, y):
             if app.userInput.isdigit():
                 num = int(app.userInput)
-                if 0 <= num <= 200:
+                if 0 <= num <= 500:
                     app.boidNumber = int(app.userInput)
                     app.boids = []
                     for _ in range(app.boidNumber):
@@ -359,7 +386,6 @@ def onMousePress(app, x, y):
         if app.addBoid.isOn(x, y):
             app.addBoid.state = True
             app.addObstacle.state = False
-            app.obstacle = [] #remove obstacles when its state is off
             app.predatorMode.state = False
         # add obstacles on mouse click
         elif app.addObstacle.isOn(x, y):
@@ -371,7 +397,11 @@ def onMousePress(app, x, y):
             app.predatorMode.state = True
             app.addBoid.state = False
             app.addObstacle.state = False
-            app.obstacle = []
+        elif app.specialGame.isOn(x, y):
+            app.specialGame.state = not app.specialGame.state
+            app.predatorMode.state = False
+            app.addBoid.state = False
+            app.addObstacle.state = False
     # avoid overdrawing the buttons with obstacles       
     if app.addObstacle.state and not (app.ruleButtons.cohesionClicked(x, y, app) or 
                                       app.ruleButtons.alignmentClicked(x, y, app) or
@@ -397,21 +427,22 @@ def onKeyPress(app, key):
         
 def onMouseMove(app, x, y):
     # control the degree and movement of predator on mouse move
-    if app.pred != None:
-        if (x != app.pred['x'] and app.pred['y'] != y):   #mouse pos changed    
-            dx = x - app.pred['x']
-            dy = y - app.pred['y']
+    if app.predatorMode.state:
+        if app.pred != None:
+            if (x != app.pred['x'] and app.pred['y'] != y):   #mouse pos changed    
+                dx = x - app.pred['x']
+                dy = y - app.pred['y']
+                app.pred = {
+                    'x': x,
+                    'y': y,
+                    'd': (math.degrees(math.atan2(dy, dx))+90)%360,
+                }
+        else:
             app.pred = {
                 'x': x,
                 'y': y,
-                'd': (math.degrees(math.atan2(dy, dx))+90)%360,
+                'd': 0,
             }
-    else:
-        app.pred = {
-            'x': x,
-            'y': y,
-            'd': 0,
-        }
                     
 def redrawAll(app):
     #  Loop through all boids and draw them as triangles 
@@ -428,7 +459,5 @@ def redrawAll(app):
             drawInfoPage(app)
     else:
         menuBar(app)
-        
-    
-    
+           
 runApp()                

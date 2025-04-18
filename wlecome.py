@@ -39,8 +39,8 @@ def drawWelcome(app):
     # what is boid button
     app.boidInfo.draw()
     # input button
-    drawLabel("enter number between 0 and 200", app.width/2, app.height*0.46, 
-                size=app.width*0.019, font='times new roman', fill='white')
+    drawLabel("enter number between 0 and 500", app.width/2, app.height*0.46, 
+                size = app.width*0.019, font = 'times new roman', fill = 'white')
     app.inputButton.draw()
     app.startButton.draw()  # start button
     if app.invalidNum:
