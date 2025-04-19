@@ -89,3 +89,16 @@ def drawProfs(app):
               size = 25, fill = "white", font='times new roman')
     drawRect(app.eduardoX, app.eduardoY, app.eduardoHeight, app.eduardoWidth,
              fill = None, border = "blue", align = "center")
+
+def moveProfs(app):
+    if app.gianni:
+        drawImage("people/profGianni.png", app.moveX, app.moveY, 
+              width = app.profWidth, height = app.profHeight)
+    elif app.eduardo:
+        drawImage("people/profEduardo.png", app.moveX, app.moveY, 
+              width = app.profWidth, height = app.profHeight)
+    if len(app.people) == 0:
+        drawLabel("Professor ATE! as usual:)", app.width//2, app.height//2, 
+              size = 30, fill = "white", font='times new roman')
+         
+        

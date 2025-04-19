@@ -336,7 +336,9 @@ def onAppStart(app):
     app.gianniHeight, app.gianniWidth = app.width*0.2, app.height*0.35
     app.eduardoX, app.eduardoY = 2*app.width//3, app.height//2
     app.eduardoHeight, app.eduardoWidth =  app.width*0.2, app.height*0.35
-    
+    # to control how they are moving with arrows
+    app.moveX, app.moveY = app.width//2, app.height//2
+    app.profWidth, app.profHeight = 150, 150
 
 # click R to reset!       
 def reset(app):
@@ -451,6 +453,7 @@ def onMousePress(app, x, y):
             app.predatorMode.state = False
             app.addBoid.state = False
             app.addObstacle.state = False
+            app.obstacle = []
            
          # switch mode to game  
         if app.specialGame.isOn(x, y):
@@ -510,7 +513,34 @@ def onMouseMove(app, x, y):
                 'y': y,
                 'd': 0,
             }
-                  
+
+####
+
+def onKeyHold(app, keys):
+    step = 20
+    if app.gianni or app.eduardo:
+        if 'left' in keys:
+            app.moveX -= step
+        if 'right' in keys:
+            app.moveX += step
+        if 'up' in keys:
+            app.moveY -= step
+        if 'down' in keys:
+            app.moveY += step
+    
+    # pop the people when the Professor catches
+    i = 0
+    while i < len(app.people):
+        person = app.people[i]
+        dx = app.moveX - person.x
+        dy = app.moveY - person.y
+        dist = (dx**2 + dy**2)**0.5
+        if dist < 30:  # or use a collision radius you prefer
+            app.people.pop(i)
+        else:
+            i += 1
+    
+              
 def redrawAll(app):
     #  Loop through all boids and draw them as triangles 
     if not app.gameMode:
@@ -520,6 +550,7 @@ def redrawAll(app):
         if not app.gianni and not app.eduardo:
             drawProfs(app)
         if app.gianni or app.eduardo:
+            moveProfs(app)
             drawPeople(app)
             
     # START PAGE 
