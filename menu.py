@@ -1,8 +1,6 @@
 from cmu_graphics import *
 import random 
 import math
-
-
 # this class is for controlling the buttons inside the menu
 class MenuButton:
     def __init__(self, y, label, app, state=False):
@@ -71,5 +69,23 @@ def menuBar(app):
     
     
     
+def drawProfs(app):
+    # choose the player label
+    drawLabel("Choose the player!", app.width//2, app.height*0.2, 
+              size = 30, fill = "white")
     
+    # draw the Gianni Button
+    drawImage("people/profGianni.png", app.gianniX, app.gianniY, 
+              height = 200, width = 200, align = "center")
+    drawLabel("Gianni the Great", app.gianniX, app.gianniY+100, 
+              size = 25, fill = "white", font='times new roman')
+    drawRect(app.gianniX, app.gianniY, app.gianniHeight, app.gianniWidth,
+             fill = None, border = "blue", align = "center")
     
+    # draw the Gianni Button
+    drawImage("people/profEduardo.png", app.eduardoX, app.eduardoY, 
+              height = 200, width = 200, align = "center")
+    drawLabel("Eduardo the Great", app.eduardoX, app.eduardoY+100, 
+              size = 25, fill = "white", font='times new roman')
+    drawRect(app.eduardoX, app.eduardoY, app.eduardoHeight, app.eduardoWidth,
+             fill = None, border = "blue", align = "center")

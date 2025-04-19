@@ -107,13 +107,10 @@ def avoidPredator (boid, predator, minDist):
     magnitude = (vector[0]**2 + vector[1]**2)**0.5
     if magnitude > 0:
         vector[0] /= magnitude
-        vector[1] /= magnitude 
-          
+        vector[1] /= magnitude      
     return vector
     
     
-
-
 #draw boid polygons_____________________________________________________________ 
 def drawBoid(app, boid):
      # Calculate rotation angle based on velocity
@@ -132,11 +129,13 @@ def drawBoid(app, boid):
     rightX = boid.x - app.boidSize # Back right x
     rightY = boid.y + app.boidSize / 1.5  # Back right y
     drawPolygon(
-            tipX, tipY,  # Tip of the triangle 
-            leftX, leftY,  # Back left wing
-            rightX, rightY,  # Back right wing
-            fill = app.color, rotateAngle = angle)
+        tipX, tipY,  # Tip of the triangle 
+        leftX, leftY,  # Back left wing
+        rightX, rightY,  # Back right wing
+        fill = rgb(173, 216, 230),
+        rotateAngle = angle)
 
+    
 #______________________________CLASS_BOIDS______________________________________
 class Boids:
     # Initializes a boid with a position (x, y) and a velocity (vx, vy).
@@ -145,7 +144,7 @@ class Boids:
         self.x = x
         self.y = y 
         self.vx = vx 
-        self.vy = vy   
+        self.vy = vy 
     # Updates the boid's position by adding its velocity   
     def moveBoid(self, quadtree, visualRange, rule1, rule2, rule3, app):
         allNeighbors = neighbors(self, quadtree, visualRange)
@@ -165,19 +164,18 @@ class Boids:
         # apply rules for separation
         if rule3:
             separationImpact = separation(self, allNeighbors, minDist = 30)
-            self.vx += separationImpact[0] * 1.1
-            self.vy += separationImpact[1] * 1.1
+            self.vx += separationImpact[0] * 2.1
+            self.vy += separationImpact[1] * 2.1
         
-        # apply rule for avoiding obstacle
-        obstacleImpact = avoidObstacle(self, app.obstacle, 70)
-        self.vx += obstacleImpact[0] * 2
-        self.vy += obstacleImpact[1] * 2 # escape the obstacle with faster speed
+        # apply rule for avoiding obstacle 
+        obstacleImpact = avoidObstacle(self, app.obstacle, 50)
+        self.vx += obstacleImpact[0] * 4
+        self.vy += obstacleImpact[1] * 4 # escape the obstacle with faster speed
         
         # apply rule for escaping the predator
         predatorImpact = avoidPredator(self, app.pred, 50)
         self.vx += predatorImpact[0] * 3
         self.vy += predatorImpact[1] * 3
-        
         
         # limit the speed 
         maxSpeed = 15
@@ -195,7 +193,7 @@ class Boids:
         
     # each boid should avoid dissapearing from the canvas
     def avoidEdges(self, width, height):
-        margin = 100 # margin by which boid starts to avoid
+        margin = 200 # margin by which boid starts to avoid
         turnFactor = 1 # factor by which boid makes the turn 
         if self.x < margin:
             self.vx += turnFactor
@@ -220,10 +218,8 @@ class People(Boids):
         return super().avoidEdges(width, height)
     
     def draw(self):
-        drawImage(self.image, self.x, self.y, width=80, height=80)
+        drawImage(self.image, self.x, self.y, width=100, height=100)
   
-    
-
 # manually drawing people
 def addPeople(app):
     images = ["people/adam.png", "people/amen.png", 
@@ -258,8 +254,6 @@ def basicParameters(app):
     app.boidNumber = 100
     app.boidSize = 6
     app.visualRange = 60
-    app.centeringStep = 0.008 # adjust velocity by this %
-    
     """
     use the class Boids and create boidNumber of boids at random positions
     with initial velocity set between -2 to 2 so they go right/left/up/down
@@ -324,7 +318,7 @@ def menuParameters(app):
 def onAppStart(app):
     app.background = "black"
     app.width = 1400
-    app.height = 800 
+    app.height = 800
     # fundamental variables for boid movement
     basicParameters(app)
     # Rule Botton coordinates 
@@ -336,6 +330,13 @@ def onAppStart(app):
     # Game paramters
     app.gameMode = False
     app.people = []
+    app.gianni = False
+    app.eduardo = False
+    app.gianniX, app.gianniY = app.width//3, app.height//2
+    app.gianniHeight, app.gianniWidth = app.width*0.2, app.height*0.35
+    app.eduardoX, app.eduardoY = 2*app.width//3, app.height//2
+    app.eduardoHeight, app.eduardoWidth =  app.width*0.2, app.height*0.35
+    
 
 # click R to reset!       
 def reset(app):
@@ -364,25 +365,21 @@ def onStep(app):
             qt.insert(Point(person.x, person.y, data=person))
         for person in app.people:
             person.movePeople(qt, app.visualRange,
-                            app.cohesion, app.alignment, app.separation, app)
+                                app.cohesion, app.alignment, app.separation, app)
             person.avoidEdges(app.width, app.height)
         
        
     # Update the coordinates of the buttons in case of screen resize
     app.boidInfo = WelcomeButtons(app.width/2, app.height * 0.38, 
-                    app.width * 0.25, app.height * 0.1, "What is Boid?")
-    
+                    app.width * 0.25, app.height * 0.1, "What is Boid?") 
     app.inputButton = WelcomeButtons(app.width/2, app.height * 0.55, 
                     app.width * 0.25, app.height * 0.1, app.userInput)
-    
     app.startButton = WelcomeButtons(app.width/2, app.height * 0.66, 
                     app.width * 0.25, app.height * 0.1, "START!")
     app.menuX = app.width - app.width * 0.05
     # update the list of obstacles in each frame
     app.obstacle = app.obstacle
-    
-    
-       
+         
 def onMousePress(app, x, y):
     # start botton 
     if app.start:
@@ -422,8 +419,9 @@ def onMousePress(app, x, y):
         app.separation = not app.separation
     # One mouse press boid generation
     if app.addBoid.state:
-        app.boids.append(Boids(x, y, random.uniform(-2, 2), 
+        newBoid = app.boids.append(Boids(x, y, random.uniform(-2, 2), 
                                random.uniform(-2, 2)))
+        
     
     # when the menu bar is clicked, close and open the menu 
     if (app.menuX <= x <= app.menuX + app.menuWidth and
@@ -459,7 +457,18 @@ def onMousePress(app, x, y):
             app.gameMode = not app.gameMode
             if app.gameMode:
                 addPeople(app)
-        
+                
+    # start the special game
+    if app.gameMode:
+        # clicked on prof Gianni 
+        if (app.gianniX - app.gianniWidth/2 <= x <= app.gianniX + app.gianniWidth/2 and
+            app.gianniY - app.gianniHeight/2 <= y <= app.gianniY + app.gianniHeight/2):
+            app.gianni = True
+        # clicked on prof Eduardo  
+        if (app.eduardoX - app.eduardoWidth/2 <= x <= app.eduardoX + app.eduardoWidth/2 and
+            app.eduardoY - app.eduardoHeight/2 <= y <= app.eduardoY + app.eduardoHeight/2):
+            app.eduardo = True
+    
     # avoid overdrawing the buttons with obstacles       
     if app.addObstacle.state and not (app.ruleButtons.cohesionClicked(x, y, app) or 
                                       app.ruleButtons.alignmentClicked(x, y, app) or
@@ -501,20 +510,18 @@ def onMouseMove(app, x, y):
                 'y': y,
                 'd': 0,
             }
-
-
-
-
-                   
+                  
 def redrawAll(app):
     #  Loop through all boids and draw them as triangles 
     if not app.gameMode:
         for boid in app.boids:
             drawBoid(app, boid)  
     elif app.gameMode:
-        drawPeople(app)
-              
-    
+        if not app.gianni and not app.eduardo:
+            drawProfs(app)
+        if app.gianni or app.eduardo:
+            drawPeople(app)
+            
     # START PAGE 
     if app.start:
         drawWelcome(app)
