@@ -132,7 +132,7 @@ def drawBoid(app, boid):
         tipX, tipY,  # Tip of the triangle 
         leftX, leftY,  # Back left wing
         rightX, rightY,  # Back right wing
-        fill = rgb(173, 216, 230),
+        fill =app.color,
         rotateAngle = angle)
 
     
@@ -163,9 +163,10 @@ class Boids:
         
         # apply rules for separation
         if rule3:
-            separationImpact = separation(self, allNeighbors, minDist = 30)
+            separationImpact = separation(self, allNeighbors, minDist = 20)
             self.vx += separationImpact[0] * 2.1
             self.vy += separationImpact[1] * 2.1
+        
         
         # apply rule for avoiding obstacle 
         obstacleImpact = avoidObstacle(self, app.obstacle, 50)
@@ -174,8 +175,8 @@ class Boids:
         
         # apply rule for escaping the predator
         predatorImpact = avoidPredator(self, app.pred, 50)
-        self.vx += predatorImpact[0] * 3
-        self.vy += predatorImpact[1] * 3
+        self.vx += predatorImpact[0] * 4
+        self.vy += predatorImpact[1] * 4
         
         # limit the speed 
         maxSpeed = 15
@@ -210,6 +211,8 @@ class People(Boids):
     def __init__(self, x, y, vx, vy, image):
         super().__init__(x, y, vx, vy)
         self.image = image
+    
+    
         
     def movePeople(self, quadtree, visualRange, rule1, rule2, rule3, app):
         return super().moveBoid(quadtree, visualRange, rule1, rule2, rule3, app)
@@ -225,7 +228,7 @@ def addPeople(app):
     images = ["people/adam.png", "people/amen.png", 
               "people/anurag.png",  "people/belix.png",
               "people/mohammed.png", "people/salman.png", 
-              "people/yasa.png"]
+              "people/yasa.png", "people/sulthan.png"]
     for img in images:
         app.people.append(People(
             x = random.randint(0, app.width),
@@ -244,12 +247,14 @@ def drawPeople(app):
 
 def basicParameters(app):
     app.start = True
-    app.color = rgb(90, 69, 167)
+    app.color = rgb(191, 213, 189)
     
     # Boid rules 
     app.cohesion = True
     app.alignment = True 
     app.separation = True 
+    # People specific rules
+    app.separatePeople = True
     # Boid's parameters
     app.boidNumber = 100
     app.boidSize = 6
@@ -312,7 +317,10 @@ def menuParameters(app):
     app.predatorSize = 30
     app.pred = None
     # special game button
-    app.specialGame = MenuButton(app.height*0.5, "Special Game", app)
+    app.specialGame = MenuButton(app.height*0.6, "Special Game", app)
+    # turn the grid on and off
+    app.gridOn = MenuButton(app.height*0.5, "Grids On", app)
+    app.day = MenuButton(app.height*0.7, "Day Mode", app)
     
  #____________________________onAppStart________________________________________    
 def onAppStart(app):
@@ -339,6 +347,9 @@ def onAppStart(app):
     # to control how they are moving with arrows
     app.moveX, app.moveY = app.width//2, app.height//2
     app.profWidth, app.profHeight = 150, 150
+    # grid variables
+    app.quadtree = None
+     
 
 # click R to reset!       
 def reset(app):
@@ -351,8 +362,14 @@ def onStep(app):
     # Insert all boids into the quadtree based on current position
     for boid in app.boids:
         qt.insert(Point(boid.x, boid.y, data=boid)) 
-        
-        
+    
+    
+    # draw the grid    
+    app.quadtree = Quadtree(Rectangle(0, 0, app.width, app.height), capacity=4)
+    for boid in app.boids:
+        app.quadtree.insert(Point(boid.x, boid.y, data=boid))
+    
+    # main page    
     if not app.start and not app.gameMode:
         # move after welcome page is closed
         for boid in app.boids:
@@ -366,8 +383,8 @@ def onStep(app):
         for person in app.people: 
             qt.insert(Point(person.x, person.y, data=person))
         for person in app.people:
-            person.movePeople(qt, app.visualRange,
-                                app.cohesion, app.alignment, app.separation, app)
+            person.movePeople(qt, app.visualRange, app.cohesion, app.alignment, 
+                            app.separation, app)
             person.avoidEdges(app.width, app.height)
         
        
@@ -402,9 +419,9 @@ def onMousePress(app, x, y):
                     if 0 <= num <= 500:
                         app.boidNumber = int(app.userInput)
                         app.boids = []
-                        for _ in range(app.boidNumber):
-                            bx = random.randint(0, app.width)
-                            by = random.randint(0, app.height)
+                        for boid in range(app.boidNumber):
+                            bx = random.uniform(0, app.width)
+                            by = random.uniform(0, app.height)
                             vx = random.uniform(-2, 2)
                             vy = random.uniform(-2, 2)
                             app.boids.append(Boids(bx, by, vx, vy))
@@ -454,6 +471,12 @@ def onMousePress(app, x, y):
             app.addBoid.state = False
             app.addObstacle.state = False
             app.obstacle = []
+            
+        elif app.gridOn.isOn(x, y):
+            app.gridOn.state = not app.gridOn.state 
+            
+        elif app.day.isOn(x, y):
+            app.day.state = not app.day.state
            
          # switch mode to game  
         if app.specialGame.isOn(x, y):
@@ -539,13 +562,18 @@ def onKeyHold(app, keys):
             app.people.pop(i)
         else:
             i += 1
-    
+   
               
 def redrawAll(app):
     #  Loop through all boids and draw them as triangles 
+    if app.day.state: 
+        drawImage("images/landscape.jpeg", 0, 0, width=app.width, height=app.height)
     if not app.gameMode:
         for boid in app.boids:
             drawBoid(app, boid)  
+        if app.quadtree and app.gridOn.state:
+            drawQuadtreeGrid(app.quadtree)
+           
     elif app.gameMode:
         if not app.gianni and not app.eduardo:
             drawProfs(app)
@@ -562,5 +590,6 @@ def redrawAll(app):
         menuBar(app)
          # draw the rule buttons 
         app.ruleButtons.draw(app) 
-           
+        
+    
 runApp()                

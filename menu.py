@@ -48,7 +48,9 @@ def menuBar(app):
         app.addBoid.drawButton()
         app.addObstacle.drawButton()
         app.predatorMode.drawButton()   
-        app.specialGame.drawButton()    
+        app.specialGame.drawButton()  
+        app.gridOn.drawButton()  
+        app.day.drawButton()
     # draw the menu bar using image    
     drawImage("images/blackMenu.png", 
             app.menuX, app.menuY, width=app.menuWidth, height=app.menuHeight,

@@ -1,6 +1,7 @@
 # I am using QuadTree to optimize the neighbor loop
 # It's a complex algorithm (I don't fully unserstand)
 # Wikipedia itself didn't help, I give credit to all youtube videos I used in the readme file
+from cmu_graphics import *
 
 class Point:
     def __init__(self, x, y, data = None):
@@ -90,3 +91,21 @@ class Quadtree:
             del self.northeast
             del self.southwest
             del self.southeast
+            
+
+
+# draw the quadtree
+def drawQuadtreeGrid(quadtree):
+    # Get this node's rectangle
+    rect = quadtree.boundary
+
+    # Draw this node's boundary
+    drawRect(rounded(rect.x), rounded(rect.y), rounded(rect.w), rounded(rect.h), 
+             fill = None, borderWidth = 1, border='gray')
+
+    # If subdivided, recursively draw children
+    if quadtree.divided:
+        drawQuadtreeGrid(quadtree.northwest)
+        drawQuadtreeGrid(quadtree.northeast)
+        drawQuadtreeGrid(quadtree.southwest)
+        drawQuadtreeGrid(quadtree.southeast)
