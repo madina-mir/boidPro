@@ -6,6 +6,12 @@ from ruleButtons import *
 from menu import *
 from quadTree import *
 from specialGame import *
+import os, pathlib 
+from PIL import Image 
+
+
+def openImage(fileName):
+    return Image.open(os.path.join(pathlib.Path(__file__).parent,fileName))
 
 # HELPER FUNCTIONS
 #__________________________________FIND_NEIGHBORS_______________________________
@@ -145,6 +151,7 @@ class Boids:
         self.y = y 
         self.vx = vx 
         self.vy = vy 
+        self.tail = []
     # Updates the boid's position by adding its velocity   
     def moveBoid(self, quadtree, visualRange, rule1, rule2, rule3, app):
         allNeighbors = neighbors(self, quadtree, visualRange)
@@ -188,9 +195,21 @@ class Boids:
                 self.vx = (self.vx / speed) * maxSpeed  
                 # Normalize vy while maintaining direction
                 self.vy = (self.vy / speed) * maxSpeed  
+        
+        
+         # saves previous points of bids for drawing the tail 
+        # Save current position before moving
+        self.tail.append((self.x, self.y))
+        if len(self.tail) > 10:  # Limit tail length
+            self.tail.pop(0)
+        
             
         self.x += self.vx
         self.y += self.vy 
+        
+       
+
+        
         
     # each boid should avoid dissapearing from the canvas
     def avoidEdges(self, width, height):
@@ -242,13 +261,19 @@ def drawPeople(app):
     for people in app.people:
         people.draw()
 
+def drawTail(boid):
+    # Draw tail using lines
+    for i in range(1, len(boid.tail)):
+        x1, y1 = boid.tail[i - 1]
+        x2, y2 = boid.tail[i]
+        opacity = 30 + 7 * i  # optional fading
+        drawLine(x1, y1, x2, y2, fill='lightCyan', lineWidth=2, opacity=opacity)
 #______________________________________________________________________________
 # Organization of variables assigned to onAppStart
 
 def basicParameters(app):
     app.start = True
-    app.color = rgb(191, 213, 189)
-    
+    app.color = "pink"
     # Boid rules 
     app.cohesion = True
     app.alignment = True 
@@ -276,9 +301,9 @@ def ruleButtons(app):
     app.bottonY = app.height*0.9
     app.bottonWidth = app.width * 0.1
     app.bottonHeight = app.height * 0.05
-    app.cohesionX = app.width * 0.1
-    app.alignmentX = app.width * 0.3
-    app.separationX = app.width * 0.5
+    app.cohesionX = app.width * 0.2
+    app.alignmentX = app.width * 0.4
+    app.separationX = app.width * 0.6
     # passing variables to the class
     app.ruleButtons = BoidRuleButtons(app.width, app.height,
                         app.cohesionX, app.alignmentX, app.separationX,
@@ -317,10 +342,12 @@ def menuParameters(app):
     app.predatorSize = 30
     app.pred = None
     # special game button
-    app.specialGame = MenuButton(app.height*0.6, "Special Game", app)
+    app.specialGame = MenuButton(app.height*0.7, "Special Game", app)
     # turn the grid on and off
     app.gridOn = MenuButton(app.height*0.5, "Grids On", app)
-    app.day = MenuButton(app.height*0.7, "Day Mode", app)
+    app.day = MenuButton(app.height*0.6, "Day Mode", app)
+    app.tail = MenuButton(app.height*0.8, "Tail On", app)
+    
     
  #____________________________onAppStart________________________________________    
 def onAppStart(app):
@@ -349,6 +376,8 @@ def onAppStart(app):
     app.profWidth, app.profHeight = 150, 150
     # grid variables
     app.quadtree = None
+    app.hi = CMUImage(openImage("images/landscape.jpeg"))
+    app.setMaxShapeCount(999999999)
      
 
 # click R to reset!       
@@ -362,7 +391,12 @@ def onStep(app):
     # Insert all boids into the quadtree based on current position
     for boid in app.boids:
         qt.insert(Point(boid.x, boid.y, data=boid)) 
-    
+        
+    # turn day and night
+    if app.day.state:
+        app.color = "black"
+    else:
+        app.color = "pink"
     
     # draw the grid    
     app.quadtree = Quadtree(Rectangle(0, 0, app.width, app.height), capacity=4)
@@ -398,6 +432,8 @@ def onStep(app):
     app.menuX = app.width - app.width * 0.05
     # update the list of obstacles in each frame
     app.obstacle = app.obstacle
+    
+        
          
 def onMousePress(app, x, y):
     # start botton 
@@ -420,8 +456,8 @@ def onMousePress(app, x, y):
                         app.boidNumber = int(app.userInput)
                         app.boids = []
                         for boid in range(app.boidNumber):
-                            bx = random.uniform(0, app.width)
-                            by = random.uniform(0, app.height)
+                            bx = app.width//2
+                            by = app.height//2
                             vx = random.uniform(-2, 2)
                             vy = random.uniform(-2, 2)
                             app.boids.append(Boids(bx, by, vx, vy))
@@ -438,7 +474,7 @@ def onMousePress(app, x, y):
         app.separation = not app.separation
     # One mouse press boid generation
     if app.addBoid.state:
-        newBoid = app.boids.append(Boids(x, y, random.uniform(-2, 2), 
+        app.boids.append(Boids(x, y, random.uniform(-2, 2), 
                                random.uniform(-2, 2)))
         
     
@@ -452,17 +488,17 @@ def onMousePress(app, x, y):
         # mutually exclusive features for improved efficiency
         # add boids on Mouse click
         if app.addBoid.isOn(x, y):
-            app.addBoid.state = True
+            app.addBoid.state = not app.addBoid.state
             app.addObstacle.state = False
             app.predatorMode.state = False
         # add obstacles on mouse click
         elif app.addObstacle.isOn(x, y):
-            app.addObstacle.state = True
+            app.addObstacle.state = not app.addObstacle.state
             app.addBoid.state = False
             app.predatorMode.state = False
         # become a predator and scare the boids!
         elif app.predatorMode.isOn(x, y):
-            app.predatorMode.state = True
+            app.predatorMode.state = not app.predatorMode.state
             app.addBoid.state = False
             app.addObstacle.state = False
         elif app.specialGame.isOn(x, y):
@@ -477,6 +513,9 @@ def onMousePress(app, x, y):
             
         elif app.day.isOn(x, y):
             app.day.state = not app.day.state
+            
+        elif app.tail.isOn(x, y):
+            app.tail.state = not app.tail.state
            
          # switch mode to game  
         if app.specialGame.isOn(x, y):
@@ -567,9 +606,13 @@ def onKeyHold(app, keys):
 def redrawAll(app):
     #  Loop through all boids and draw them as triangles 
     if app.day.state: 
-        drawImage("images/landscape.jpeg", 0, 0, width=app.width, height=app.height)
+        drawImage(app.hi, 0, 0, width=app.width, height=app.height)
     if not app.gameMode:
         for boid in app.boids:
+            # draw the tail first
+            if app.tail.state: 
+                drawTail(boid)
+            # draw the boid after 
             drawBoid(app, boid)  
         if app.quadtree and app.gridOn.state:
             drawQuadtreeGrid(app.quadtree)

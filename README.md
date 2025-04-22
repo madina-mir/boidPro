@@ -11,3 +11,6 @@ My project differentiates itself by significantly increasing interactivity and c
 #### **Alignment** – Boids align their velocity with the average velocity of their neighbors.
 ***
 In addition to these, my simulation will incorporate **predator avoidance**, user control over the **number of boids**, adjustable **visual range**, real-time **boid creation** via mouse clicks, and interactive **obstacles** that mimic real-world constraints like trees. Additionally, this will be the first project to integrate these advanced behaviors using cmu_graphics, making it unique in both its scope and implementation framework.
+
+
+# how the buttons work

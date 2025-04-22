@@ -1,6 +1,6 @@
 ### WELCOME BUTTONS       
 from cmu_graphics import *
-import random 
+
 def drawInfoPage(app):
     drawRect(app.width*0.2, 0, app.width * 0.6, app.height, 
                  fill = "white", opacity=0)
@@ -20,9 +20,14 @@ class WelcomeButtons:
         self.focus = app.focus 
     # method for drawing buttons with labels    
     def draw(self):
+        color = "white"
+        if self.focus:
+            color = "green"
+        else:
+            color = "white"
         drawRect(self.x, self.y, self.width, self.height, align="center",
-                 fill=None, border = "green" if self.focus else "white",
-                 borderWidth=7)
+                 fill=None, border = color,
+                 borderWidth=4)
         drawLabel(self.label, self.x, self.y, 
                 size = self.width*0.1, fill = "white", font='times new roman')
     # method to check if the button has been clicked   
@@ -51,3 +56,4 @@ def drawWelcome(app):
     if app.invalidNum:
         drawLabel("Enter valid number!", app.width/2, app.height*0.8, 
                   size = app.width*0.02, fill="red")
+    

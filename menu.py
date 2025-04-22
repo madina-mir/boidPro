@@ -1,6 +1,5 @@
 from cmu_graphics import *
-import random 
-import math
+
 # this class is for controlling the buttons inside the menu
 class MenuButton:
     def __init__(self, y, label, app, state=False):
@@ -51,6 +50,7 @@ def menuBar(app):
         app.specialGame.drawButton()  
         app.gridOn.drawButton()  
         app.day.drawButton()
+        app.tail.drawButton()
     # draw the menu bar using image    
     drawImage("images/blackMenu.png", 
             app.menuX, app.menuY, width=app.menuWidth, height=app.menuHeight,
