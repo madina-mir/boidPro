@@ -12,5 +12,19 @@ My project differentiates itself by significantly increasing interactivity and c
 ***
 In addition to these, my simulation will incorporate **predator avoidance**, user control over the **number of boids**, adjustable **visual range**, real-time **boid creation** via mouse clicks, and interactive **obstacles** that mimic real-world constraints like trees. Additionally, this will be the first project to integrate these advanced behaviors using cmu_graphics, making it unique in both its scope and implementation framework.
 
+***
+### how the Buttons work?
+R key stands for re-start 
+You can type the number of boids that you want to draw.
+All the buttons work using the mouse press.
+You can open and close the menu using the mouse press, and all the 
+features work using the mouse press. Some behaviors are mutually exclusive, 
+meaning two of them can't be on at the same time as both rely on mouse press in their implementation. 
+Arror keys are used to move the Professors in the game mode. 
 
-# how the buttons work
+***
+### Kind remarks
+THIS IS NOT A GAME, but it has a small fature called special game. 
+Imgaed do collide, because they are using the boid rules being the child 
+class of the boids. Given that I have used other rules, it would evade from the 
+central topic of my project. 

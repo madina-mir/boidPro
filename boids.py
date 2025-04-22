@@ -7,7 +7,7 @@ from menu import *
 from quadTree import *
 from specialGame import *
 import os, pathlib 
-from PIL import Image 
+from PIL import Image  # type: ignore
 
 
 def openImage(fileName):
