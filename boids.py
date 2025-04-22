@@ -5,7 +5,6 @@ from wlecome import *
 from ruleButtons import *
 from menu import *
 from quadTree import *
-from specialGame import *
 import os, pathlib 
 from PIL import Image  # type: ignore
 
@@ -203,13 +202,9 @@ class Boids:
         if len(self.tail) > 10:  # Limit tail length
             self.tail.pop(0)
         
-            
+        # update the locations    
         self.x += self.vx
         self.y += self.vy 
-        
-       
-
-        
         
     # each boid should avoid dissapearing from the canvas
     def avoidEdges(self, width, height):
@@ -230,9 +225,7 @@ class People(Boids):
     def __init__(self, x, y, vx, vy, image):
         super().__init__(x, y, vx, vy)
         self.image = image
-    
-    
-        
+           
     def movePeople(self, quadtree, visualRange, rule1, rule2, rule3, app):
         return super().moveBoid(quadtree, visualRange, rule1, rule2, rule3, app)
     
@@ -348,7 +341,21 @@ def menuParameters(app):
     app.day = MenuButton(app.height*0.6, "Day Mode", app)
     app.tail = MenuButton(app.height*0.8, "Tail On", app)
     
+def gameParameters(app):
+    app.gameMode = False
+    app.people = []
+    app.gianni = False
+    app.eduardo = False
+    app.gianniX, app.gianniY = app.width//3, app.height//2
+    app.gianniHeight, app.gianniWidth = app.width*0.2, app.height*0.35
+    app.eduardoX, app.eduardoY = 2*app.width//3, app.height//2
+    app.eduardoHeight, app.eduardoWidth =  app.width*0.2, app.height*0.35
+    # to control how they are moving with arrows
+    app.moveX, app.moveY = app.width//2, app.height//2
+    app.profWidth, app.profHeight = 150, 150
+    # grid variables
     
+     
  #____________________________onAppStart________________________________________    
 def onAppStart(app):
     app.background = "black"
@@ -363,17 +370,7 @@ def onAppStart(app):
     # menu tab variables
     menuParameters(app)
     # Game paramters
-    app.gameMode = False
-    app.people = []
-    app.gianni = False
-    app.eduardo = False
-    app.gianniX, app.gianniY = app.width//3, app.height//2
-    app.gianniHeight, app.gianniWidth = app.width*0.2, app.height*0.35
-    app.eduardoX, app.eduardoY = 2*app.width//3, app.height//2
-    app.eduardoHeight, app.eduardoWidth =  app.width*0.2, app.height*0.35
-    # to control how they are moving with arrows
-    app.moveX, app.moveY = app.width//2, app.height//2
-    app.profWidth, app.profHeight = 150, 150
+    gameParameters(app)
     # grid variables
     app.quadtree = None
     app.hi = CMUImage(openImage("images/landscape.jpeg"))
@@ -421,7 +418,7 @@ def onStep(app):
                             app.separation, app)
             person.avoidEdges(app.width, app.height)
         
-       
+    
     # Update the coordinates of the buttons in case of screen resize
     app.boidInfo = WelcomeButtons(app.width/2, app.height * 0.38, 
                     app.width * 0.25, app.height * 0.1, "What is Boid?") 
@@ -576,10 +573,11 @@ def onMouseMove(app, x, y):
                 'd': 0,
             }
 
-####
+
 
 def onKeyHold(app, keys):
     step = 20
+    # for using the arrows to move the players
     if app.gianni or app.eduardo:
         if 'left' in keys:
             app.moveX -= step
@@ -601,12 +599,12 @@ def onKeyHold(app, keys):
             app.people.pop(i)
         else:
             i += 1
-   
-              
+            
 def redrawAll(app):
-    #  Loop through all boids and draw them as triangles 
+    # to turn on and off the day
     if app.day.state: 
         drawImage(app.hi, 0, 0, width=app.width, height=app.height)
+    # main page running
     if not app.gameMode:
         for boid in app.boids:
             # draw the tail first
@@ -615,15 +613,14 @@ def redrawAll(app):
             # draw the boid after 
             drawBoid(app, boid)  
         if app.quadtree and app.gridOn.state:
-            drawQuadtreeGrid(app.quadtree)
-           
+            drawQuadtreeGrid(app.quadtree)    
+    # game mode on 
     elif app.gameMode:
         if not app.gianni and not app.eduardo:
             drawProfs(app)
         if app.gianni or app.eduardo:
             moveProfs(app)
-            drawPeople(app)
-            
+            drawPeople(app)      
     # START PAGE 
     if app.start:
         drawWelcome(app)
@@ -634,5 +631,4 @@ def redrawAll(app):
          # draw the rule buttons 
         app.ruleButtons.draw(app) 
         
-    
 runApp()                

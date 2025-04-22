@@ -10,7 +10,7 @@ My project differentiates itself by significantly increasing interactivity and c
 #### **Separation** – Boids avoid crowding by maintaining a safe distance from nearby boids.
 #### **Alignment** – Boids align their velocity with the average velocity of their neighbors.
 ***
-In addition to these, my simulation will incorporate **predator avoidance**, user control over the **number of boids**, adjustable **visual range**, real-time **boid creation** via mouse clicks, and interactive **obstacles** that mimic real-world constraints like trees. Additionally, this will be the first project to integrate these advanced behaviors using cmu_graphics, making it unique in both its scope and implementation framework.
+In addition to these, my simulation will incorporate **predator avoidance**, user control over the **number of boids**, real-time **boid creation** via mouse clicks, and interactive **obstacles** that mimic real-world constraints like trees. Additionally, this will be the first project to integrate these advanced behaviors using cmu_graphics, making it unique in both its scope and implementation framework.
 
 ***
 ### How the Buttons work?
@@ -31,4 +31,5 @@ central topic of my project.
 
 ***
 ### ACKNOWLEDGEMENT
-I thank Craig Reynolds for observing 3 fundamental rules that guide moving groups of animals. Though his explanations are generic, it was a great intro for me to get started. I also acknowledge contribution of Ben Eater, though his youtube videos about boids use JS, I greatly benefitted when implementing the algorithm. Lastly, I used QuadTree, which was recommended by Professor Eduardo to reduce the complexity of the project, and I largely benefitted by the youtube channel called "Neat AI". 
+I thank Craig Reynolds for observing 3 fundamental rules that guide moving groups of animals, and for coming up with this algorithm. Though his explanations are generic, it was a great intro for me to get started. I also thank Ben Eater, his youtube videos helped me better understand the boid algorithm. Lastly, I used a bit of computational geometry, specifically QuadTree, which was recommended by Professor Eduardo to reduce the complexity of the project, and I largely benefitted by the youtube channel called "Neat AI". 
+Note: I am acknowledging the sources that I have learned the algorithms, though I give credit, no lines of code comes from the outside source in my project. 

@@ -69,8 +69,6 @@ def menuBar(app):
                     rotateAngle = app.pred['d'], align="center")
         
     
-    
-    
 def drawProfs(app):
     # choose the player label
     drawLabel("Choose the player!", app.width//2, app.height*0.2, 

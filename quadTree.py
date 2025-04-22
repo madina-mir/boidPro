@@ -1,5 +1,4 @@
-# I am using QuadTree to optimize the neighbor loop
-# It's a complex algorithm (I don't fully unserstand)
+# I am using QuadTree algorithm to optimize the neighbor loop
 # Wikipedia itself didn't help, I give credit to all youtube videos I used in the readme file
 from cmu_graphics import *
 
@@ -86,7 +85,8 @@ class Quadtree:
     def clear(self):
         self.points = []
         self.divided = False
-        if hasattr(self, 'northwest'):
+        # whether the object self has an attribute named 'northwest'
+        if hasattr(self, 'northwest'): 
             del self.northwest
             del self.northeast
             del self.southwest
