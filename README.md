@@ -1,6 +1,8 @@
 ## 15-112 Term Project Proposal 
 #### Video Demo video 
 https://youtu.be/ZAk3_InR-3I?si=oa-UPNoOFjZRI8qC 
+#### Link to proposal in google docs
+https://docs.google.com/document/d/1d8c77tpWlHDaUj32hw10_Vy_PjAm29ZMr7o8wzsjhqQ/edit?usp=sharing 
 # BOID algorithm - simulation of moving groups of animals
 ## Project Description
 Boid algorithm was developed by Craig Reynolds in 1986, which simulates the flocking behaviour of birds and related groups of animals’ motion. While it has primarily been applied in animation and visual effects for movies, often with minimal interactivity, this project takes a different approach. The main motivation of me undertaking this project comes from a larger Research Project that aims to train a machine learning model for accurately counting animals moving in aggregations. One of the fundamental steps of the research is to accurately imitate behaviors of moving groups of animals. By implementing this simulation by adding extra interactivity and control for the user, I aim to come up with a simulation that is both unique in the field of boids simulation and also a meaningful contribution to my larger research project. 
