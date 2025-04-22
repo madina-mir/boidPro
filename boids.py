@@ -453,8 +453,8 @@ def onMousePress(app, x, y):
                         app.boidNumber = int(app.userInput)
                         app.boids = []
                         for boid in range(app.boidNumber):
-                            bx = app.width//2
-                            by = app.height//2
+                            bx = random.randint(0, app.width),
+                            by = random.randint(0, app.height),
                             vx = random.uniform(-2, 2)
                             vy = random.uniform(-2, 2)
                             app.boids.append(Boids(bx, by, vx, vy))
