@@ -1,5 +1,5 @@
 from cmu_graphics import *
-import random 
+from random import randint, uniform
 import math
 from wlecome import *
 from ruleButtons import *
@@ -243,10 +243,10 @@ def addPeople(app):
               "people/yasa.png", "people/sulthan.png"]
     for img in images:
         app.people.append(People(
-            x = random.randint(0, app.width),
-            y = random.randint(0, app.height),
-            vx = random.uniform(-2, 2),
-            vy = random.uniform(-2, 2),
+            x = randint(0, app.width),
+            y = randint(0, app.height),
+            vx = uniform(-2, 2),
+            vy = uniform(-2, 2),
             image = img
         ))
         
@@ -283,10 +283,10 @@ def basicParameters(app):
     """
     app.boids = []
     for boid in range(app.boidNumber):
-        x = random.randint(0, app.width)
-        y = random.randint(0, app.height)
-        vx = random.uniform(-2, 2)
-        vy = random.uniform(-2, 2)
+        x = randint(0, app.width)
+        y = randint(0, app.height)
+        vx = uniform(-2, 2)
+        vy = uniform(-2, 2)
         app.boids.append(Boids(x, y, vx, vy))
     
 def ruleButtons(app):
@@ -453,10 +453,10 @@ def onMousePress(app, x, y):
                         app.boidNumber = int(app.userInput)
                         app.boids = []
                         for boid in range(app.boidNumber):
-                            bx = random.randint(0, app.width),
-                            by = random.randint(0, app.height),
-                            vx = random.uniform(-2, 2)
-                            vy = random.uniform(-2, 2)
+                            bx = randint(0, app.width)
+                            by = randint(0, app.height)
+                            vx = uniform(-2, 2)
+                            vy = uniform(-2, 2)
                             app.boids.append(Boids(bx, by, vx, vy))
                         app.start = False
                     else:
@@ -471,8 +471,8 @@ def onMousePress(app, x, y):
         app.separation = not app.separation
     # One mouse press boid generation
     if app.addBoid.state:
-        app.boids.append(Boids(x, y, random.uniform(-2, 2), 
-                               random.uniform(-2, 2)))
+        app.boids.append(Boids(x, y, uniform(-2, 2), 
+                               uniform(-2, 2)))
         
     
     # when the menu bar is clicked, close and open the menu 
